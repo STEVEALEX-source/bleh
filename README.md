@@ -1,36 +1,21 @@
-# WebOS + Piano
+# WebOS
 
-A browser desktop environment with apps built in — including a **playable piano**.
+Everything runs **inside** the desktop — one HTML file.
 
-Open `index.html` (or serve the folder). No install.
+## Apps
 
-## Apps on the desktop
+**System:** Files · Notepad · Terminal · Browser · Settings  
 
-| App | What it does |
-|-----|----------------|
-| **Piano** | One-octave keyboard, songs, octave + volume. Keys `A W S E D F T G Y H U J K` |
-| **Calculator** | Basic arithmetic |
-| **Timer** | 1 / 5 / 10 / 25 min presets |
-| **Tasks** | Checklist saved in localStorage |
-| **Files / Notepad / Terminal / Browser / Settings** | Original webOS apps |
+**Create:** Piano · Calculator · Timer · Tasks  
 
-## Features
-
-- Boot screen, draggable/resizable windows, taskbar, start menu
-- Live canvas wallpapers (Aurora, Nebula, Orbs, Circuit)
-- Accent colors, optional UI sounds
-- Right-click desktop menu
-- Everything stays local (localStorage)
+**Toolbox:** Waiting on · Reply debt · Impulse lock · Leave by · Meeting cost · All tools
 
 ## Run
 
+Open `index.html` or:
+
 ```bash
 python3 -m http.server 8000
-# open http://localhost:8000
 ```
 
-Or double-click `index.html`.
-
-## Notes
-
-Piano, calc, timer, and tasks are **inside** the OS windows — not separate pages.
+No build. Data stays in localStorage.
