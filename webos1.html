@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WebOS Desktop Environment</title>
+<title>WebOS — Piano, Apps & Desktop</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     :root {
@@ -388,6 +388,83 @@
     .file-grid { display: grid; grid-template-columns: repeat(auto-fill, 80px); gap: 12px; }
     .file-item{text-align:center;cursor:pointer;padding:8px;border-radius:6px;transition:background .15s ease, transform .12s ease;}
     .file-item:hover { background: rgba(255,255,255,.12); transform: translateY(-2px); }
+
+    /* piano app */
+    .piano-app { display:flex; flex-direction:column; height:100%; gap:10px; color:#e8e8e4; }
+    .piano-controls { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; font-size:12px; color:#c8c8c0; }
+    .piano-controls label { display:flex; align-items:center; gap:6px; }
+    .piano-controls select, .piano-controls button {
+      border:1px solid rgba(255,255,255,.2); border-radius:6px; padding:6px 10px;
+      background:rgba(255,255,255,.08); color:#fff; font:12px system-ui,sans-serif; cursor:pointer;
+    }
+    .piano-controls button:hover { background:rgba(255,255,255,.16); }
+    .piano-controls input[type=range] { width:90px; accent-color:var(--accent); }
+    .piano-board {
+      position:relative; flex:1; min-height:180px; padding:8px; border-radius:8px;
+      background:#1a1c24; border:1px solid rgba(255,255,255,.1);
+      user-select:none; touch-action:manipulation;
+    }
+    .piano-whites { height:100%; display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:3px; }
+    .pkey { position:relative; padding:0; border:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    .pkey.white {
+      height:100%; border-radius:0 0 6px 6px; background:#f4f4f0; color:#333;
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+      padding-bottom:12px; font-size:11px; font-weight:600;
+      transition:background .08s, transform .08s;
+    }
+    .pkey.white:hover { background:#e8e8e4; }
+    .pkey.white.pressed, .pkey.white:active { transform:translateY(2px); background:#c8d4c8; }
+    .pkey.black {
+      position:absolute; top:8px; z-index:3; height:58%; width:8%;
+      transform:translateX(-50%); border-radius:0 0 5px 5px; background:#12141a; color:#aaa;
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+      padding-bottom:8px; font-size:9px; border:1px solid #000;
+    }
+    .pkey.black.pressed, .pkey.black:active { background:#3a4a40; }
+    .piano-status { font-size:11px; color:#8a9088; min-height:1.2em; }
+
+    /* calc */
+    .calc-app { display:grid; grid-template-rows:auto 1fr; gap:10px; height:100%; }
+    .calc-display {
+      background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.1); border-radius:8px;
+      padding:14px 16px; text-align:right; font:600 28px/1.2 ui-monospace,monospace; color:#fff;
+      min-height:56px; word-break:break-all;
+    }
+    .calc-pad { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .calc-pad button {
+      border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:14px 0;
+      background:rgba(255,255,255,.08); color:#fff; font:600 16px system-ui,sans-serif; cursor:pointer;
+    }
+    .calc-pad button:hover { background:rgba(255,255,255,.14); }
+    .calc-pad button.op { background:var(--accent-soft); border-color:var(--accent-glow); }
+    .calc-pad button.eq { background:var(--accent); color:#0c0e12; border-color:transparent; }
+
+    /* timer / tasks */
+    .tool-app { display:flex; flex-direction:column; gap:12px; height:100%; }
+    .tool-app input, .tool-app textarea {
+      width:100%; border:1px solid rgba(255,255,255,.15); border-radius:8px;
+      background:rgba(0,0,0,.25); color:#fff; padding:10px 12px; font:14px system-ui,sans-serif;
+    }
+    .tool-app button {
+      border:1px solid rgba(255,255,255,.15); border-radius:8px; padding:10px 14px;
+      background:rgba(255,255,255,.1); color:#fff; font:600 13px system-ui,sans-serif; cursor:pointer;
+    }
+    .tool-app button:hover { background:rgba(255,255,255,.16); }
+    .tool-app button.primary { background:var(--accent); color:#0c0e12; border-color:transparent; }
+    .timer-display { font:700 48px/1 ui-monospace,monospace; text-align:center; color:#fff; letter-spacing:.04em; }
+    .task-list { list-style:none; margin:0; padding:0; overflow:auto; flex:1; }
+    .task-list li {
+      display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:6px;
+      background:rgba(255,255,255,.06); border-radius:8px; border:1px solid rgba(255,255,255,.08);
+    }
+    .task-list li.done { opacity:.55; text-decoration:line-through; }
+    .task-list li button { margin-left:auto; padding:4px 8px; font-size:11px; }
+
+    .badge-piano { background:linear-gradient(145deg,#f0a060,#c45a2a); }
+    .badge-calc { background:linear-gradient(145deg,#70c0e0,#2a7090); }
+    .badge-timer { background:linear-gradient(145deg,#e0c060,#a07820); }
+    .badge-tasks { background:linear-gradient(145deg,#80d0a0,#2a8050); }
+
 </style>
 </head>
 <body>
@@ -397,6 +474,11 @@
 <symbol id="i-notepad" viewBox="0 0 24 24"><path d="M5 3.5h10l4 4V20a.5.5 0 0 1-.5.5h-13A.5.5 0 0 1 5 20V4a.5.5 0 0 1 .5-.5z"/><path d="M15 3.5V7a.5.5 0 0 0 .5.5H19"/><path d="M8 12h8M8 15.5h5"/></symbol>
 <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M7 9.5l3.5 3-3.5 3M13 15.5h4"/></symbol>
 <symbol id="i-browser" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.3 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.3-3.6-8.5S9.6 5.8 12 3.5z"/></symbol>
+
+<symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14h0M8 18h2M12 18h2M16 18h0"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
 <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2 5.6 5.6"/></symbol>
 <symbol id="i-min" viewBox="0 0 10 10"><path d="M2 5h6"/></symbol>
 <symbol id="i-max" viewBox="0 0 10 10"><rect x="2.2" y="2.2" width="5.6" height="5.6" rx="0.8"/></symbol>
@@ -417,6 +499,10 @@
   <div class="icon" onclick="openApp('notepad', event)"><div class="icon-badge badge-notepad"><svg class="badge-glyph"><use href="#i-notepad"/></svg></div><span class="label">Notepad</span></div>
   <div class="icon" onclick="openApp('terminal', event)"><div class="icon-badge badge-terminal"><svg class="badge-glyph"><use href="#i-terminal"/></svg></div><span class="label">Terminal</span></div>
   <div class="icon" onclick="openApp('browser', event)"><div class="icon-badge badge-browser"><svg class="badge-glyph"><use href="#i-browser"/></svg></div><span class="label">Browser</span></div>
+  <div class="icon" onclick="openApp('piano', event)"><div class="icon-badge badge-piano"><svg class="badge-glyph"><use href="#i-music"/></svg></div><span class="label">Piano</span></div>
+  <div class="icon" onclick="openApp('calc', event)"><div class="icon-badge badge-calc"><svg class="badge-glyph"><use href="#i-calc"/></svg></div><span class="label">Calc</span></div>
+  <div class="icon" onclick="openApp('timer', event)"><div class="icon-badge badge-timer"><svg class="badge-glyph"><use href="#i-clock"/></svg></div><span class="label">Timer</span></div>
+  <div class="icon" onclick="openApp('tasks', event)"><div class="icon-badge badge-tasks"><svg class="badge-glyph"><use href="#i-check"/></svg></div><span class="label">Tasks</span></div>
   <div class="icon" onclick="openApp('settings', event)"><div class="icon-badge badge-settings"><svg class="badge-glyph"><use href="#i-settings"/></svg></div><span class="label">Settings</span></div>
 </div>
 
@@ -426,6 +512,10 @@
   <div class="menu-item" onclick="openApp('notepad', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-notepad"/></svg> Notepad</div>
   <div class="menu-item" onclick="openApp('terminal', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-terminal"/></svg> Terminal</div>
   <div class="menu-item" onclick="openApp('browser', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-browser"/></svg> Browser</div>
+  <div class="menu-item" onclick="openApp('piano', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-music"/></svg> Piano</div>
+  <div class="menu-item" onclick="openApp('calc', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-calc"/></svg> Calculator</div>
+  <div class="menu-item" onclick="openApp('timer', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-clock"/></svg> Timer</div>
+  <div class="menu-item" onclick="openApp('tasks', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-check"/></svg> Tasks</div>
   <div class="menu-item" onclick="openApp('settings', event); toggleStartMenu();"><svg class="menu-glyph" viewBox="0 0 24 24"><use href="#i-settings"/></svg> Settings</div>
 </div>
 
@@ -999,6 +1089,102 @@ function openApp(app, event){
       `, 700, 480, event)
       break
 
+
+    case 'piano':
+      createWindow('piano', '🎹 Piano', `
+        <div class="piano-app">
+          <div class="piano-controls">
+            <label>Song
+              <select id="p-song">
+                <option value="twinkle">Twinkle Twinkle</option>
+                <option value="mary">Mary Had a Little Lamb</option>
+                <option value="ode">Ode to Joy</option>
+                <option value="birthday">Happy Birthday</option>
+              </select>
+            </label>
+            <label>Octave
+              <select id="p-octave">
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="5">5</option>
+              </select>
+            </label>
+            <label>Vol <input id="p-vol" type="range" min="0" max="100" value="62"></label>
+            <button type="button" id="p-play">Play</button>
+          </div>
+          <div class="piano-board">
+            <div class="piano-whites" id="p-whites"></div>
+            <div id="p-blacks"></div>
+          </div>
+          <div class="piano-status" id="p-status">Keys: A W S E D F T G Y H U J K · ready</div>
+        </div>
+      `, 720, 360, event)
+      setTimeout(initPianoApp, 30)
+      break
+
+    case 'calc':
+      createWindow('calc', '🔢 Calculator', `
+        <div class="calc-app">
+          <div class="calc-display" id="calc-display">0</div>
+          <div class="calc-pad">
+            <button type="button" onclick="calcInput('C')">C</button>
+            <button type="button" onclick="calcInput('±')">±</button>
+            <button type="button" class="op" onclick="calcInput('%')">%</button>
+            <button type="button" class="op" onclick="calcInput('/')">÷</button>
+            <button type="button" onclick="calcInput('7')">7</button>
+            <button type="button" onclick="calcInput('8')">8</button>
+            <button type="button" onclick="calcInput('9')">9</button>
+            <button type="button" class="op" onclick="calcInput('*')">×</button>
+            <button type="button" onclick="calcInput('4')">4</button>
+            <button type="button" onclick="calcInput('5')">5</button>
+            <button type="button" onclick="calcInput('6')">6</button>
+            <button type="button" class="op" onclick="calcInput('-')">−</button>
+            <button type="button" onclick="calcInput('1')">1</button>
+            <button type="button" onclick="calcInput('2')">2</button>
+            <button type="button" onclick="calcInput('3')">3</button>
+            <button type="button" class="op" onclick="calcInput('+')">+</button>
+            <button type="button" onclick="calcInput('0')">0</button>
+            <button type="button" onclick="calcInput('.')">.</button>
+            <button type="button" class="eq" onclick="calcInput('=')" style="grid-column:span 2">=</button>
+          </div>
+        </div>
+      `, 320, 420, event)
+      window._calc = { expr: '0', reset: false }
+      break
+
+    case 'timer':
+      createWindow('timer', '⏱ Timer', `
+        <div class="tool-app">
+          <div class="timer-display" id="timer-display">05:00</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <button type="button" onclick="timerSet(60)">1m</button>
+            <button type="button" onclick="timerSet(300)">5m</button>
+            <button type="button" onclick="timerSet(600)">10m</button>
+            <button type="button" onclick="timerSet(1500)">25m</button>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button type="button" class="primary" id="timer-toggle" onclick="timerToggle()">Start</button>
+            <button type="button" onclick="timerReset()">Reset</button>
+          </div>
+        </div>
+      `, 340, 280, event)
+      window._timer = { left: 300, running: false, id: null }
+      timerRender()
+      break
+
+    case 'tasks':
+      createWindow('tasks', '✅ Tasks', `
+        <div class="tool-app">
+          <div style="display:flex;gap:8px;">
+            <input id="task-input" placeholder="New task..." onkeydown="if(event.key==='Enter')taskAdd()" />
+            <button type="button" class="primary" onclick="taskAdd()">Add</button>
+          </div>
+          <ul class="task-list" id="task-list"></ul>
+        </div>
+      `, 400, 380, event)
+      setTimeout(taskRender, 20)
+      break
+
     case 'settings': {
       const soundOn = localStorage.getItem('webos_sound') !== 'off'
       const chimeOn = localStorage.getItem('webos_chime') === 'on'
@@ -1098,6 +1284,203 @@ function openApp(app, event){
   }
 }
 
+
+/* ---- Piano (embedded) ---- */
+function initPianoApp(){
+  const whiteSteps=[0,2,4,5,7,9,11,12]
+  const blackSteps=[1,3,6,8,10]
+  const blackPositions=[12.5,25,50,62.5,75]
+  const names=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"]
+  const keyMap={a:0,w:1,s:2,e:3,d:4,f:5,t:6,g:7,y:8,h:9,u:10,j:11,k:12}
+  const whiteRoot=document.getElementById('p-whites')
+  const blackRoot=document.getElementById('p-blacks')
+  const octaveControl=document.getElementById('p-octave')
+  const volumeControl=document.getElementById('p-vol')
+  const songControl=document.getElementById('p-song')
+  const playSongButton=document.getElementById('p-play')
+  const status=document.getElementById('p-status')
+  if(!whiteRoot) return
+
+  let audio=null, activeMidi=[], songTimers=[], songRun=0
+  const songs={
+    twinkle:[0,0,7,7,9,9,7,5,5,4,4,2,2,0,7,7,5,5,4,4,2,7,7,5,5,4,4,2,0,0,7,7,9,9,7,5,5,4,4,2,2,0],
+    mary:[4,2,0,2,4,4,4,2,2,2,4,7,7,4,2,0,2,4,4,4,4,2,2,4,2,0],
+    ode:[4,4,5,7,7,5,4,2,0,0,2,4,4,2,2,4,4,5,7,7,5,4,2,0,0,2,4,2,0,0],
+    birthday:[0,0,2,0,5,4,0,0,2,0,7,5,0,0,12,9,5,4,2,10,10,9,5,7,5]
+  }
+  const noteName=midi=>names[midi%12]+(Math.floor(midi/12)-1)
+
+  function stopSong(){
+    songRun++; songTimers.forEach(t=>clearTimeout(t)); songTimers=[]
+    if(playSongButton){ playSongButton.textContent='Play' }
+  }
+  function playSong(){
+    if(songTimers.length){ stopSong(); return }
+    const melody=songs[songControl.value]; const run=++songRun
+    playSongButton.textContent='Stop'
+    melody.forEach((note,beat)=>{
+      songTimers.push(setTimeout(()=>{
+        if(run!==songRun) return
+        play(note)
+        if(beat===melody.length-1){ songTimers=[]; playSongButton.textContent='Play' }
+      }, beat*340))
+    })
+  }
+  function makeKey(midi,index,color){
+    const button=document.createElement('button')
+    button.type='button'; button.className='pkey '+color; button.dataset.index=String(index)
+    button.setAttribute('aria-label', noteName(midi))
+    button.innerHTML='<span>'+names[midi%12]+'</span>'
+    button.addEventListener('pointerdown', e=>{ e.preventDefault(); play(index) })
+    return button
+  }
+  function buildKeyboard(){
+    stopSong()
+    const base=Number(octaveControl.value)*12+12
+    activeMidi=Array.from({length:13},(_,i)=>base+i)
+    whiteRoot.replaceChildren(); blackRoot.replaceChildren()
+    whiteSteps.forEach(step=> whiteRoot.appendChild(makeKey(base+step, step, 'white')))
+    blackSteps.forEach((step,i)=>{
+      const button=makeKey(base+step, step, 'black')
+      button.style.left = blackPositions[i]+'%'
+      blackRoot.appendChild(button)
+    })
+    status.textContent = 'C'+octaveControl.value+'–C'+(Number(octaveControl.value)+1)+' · A–K keys · ready'
+  }
+  async function getAudio(){
+    if(!audio){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; audio=new C() }
+    if(audio.state==='suspended'){ try{ await audio.resume() }catch(_){ return null } }
+    return audio
+  }
+  async function play(index){
+    const context=await getAudio(); if(!context) return
+    const midi=activeMidi[index], frequency=440*Math.pow(2,(midi-69)/12), now=context.currentTime
+    const master=context.createGain(), filter=context.createBiquadFilter()
+    const loudness=Math.max(.0001, Number(volumeControl.value)/100*.22)
+    master.gain.setValueAtTime(.0001,now)
+    master.gain.exponentialRampToValueAtTime(loudness, now+.006)
+    master.gain.exponentialRampToValueAtTime(.0001, now+2.2)
+    filter.type='lowpass'; filter.frequency.setValueAtTime(5200,now); filter.Q.value=.7
+    master.connect(filter); filter.connect(context.destination)
+    ;[[1,1],[2,.31],[3,.12],[4,.055],[5,.022]].forEach(([ratio,amp],partial)=>{
+      const o=context.createOscillator(), g=context.createGain()
+      o.type=partial===0?'triangle':'sine'; o.frequency.setValueAtTime(frequency*ratio, now)
+      g.gain.value=amp; o.connect(g); g.connect(master); o.start(now); o.stop(now+2.25)
+    })
+    const key=document.querySelector('.pkey[data-index="'+index+'"]')
+    if(key){ key.classList.add('pressed'); setTimeout(()=>key.classList.remove('pressed'), 140) }
+    status.textContent = noteName(midi)+' · playing'
+  }
+  octaveControl.addEventListener('change', buildKeyboard)
+  songControl.addEventListener('change', stopSong)
+  playSongButton.addEventListener('click', playSong)
+  // keyboard only while piano window focused
+  window._pianoKeyHandler = (e)=>{
+    const win=document.getElementById('win-piano')
+    if(!win || win.classList.contains('minimized') || !win.classList.contains('focused')) return
+    if(e.repeat||e.ctrlKey||e.altKey||e.metaKey) return
+    if(['INPUT','SELECT','TEXTAREA'].includes(e.target&&e.target.tagName)) return
+    const index=keyMap[e.key.toLowerCase()]
+    if(index!==undefined){ e.preventDefault(); play(index) }
+  }
+  window.removeEventListener('keydown', window._pianoKeyHandler)
+  window.addEventListener('keydown', window._pianoKeyHandler)
+  buildKeyboard()
+}
+
+/* ---- Calculator ---- */
+function calcInput(key){
+  const d=document.getElementById('calc-display'); if(!d) return
+  let s = window._calc || { expr:'0', reset:false }
+  if(key==='C'){ s={expr:'0', reset:false} }
+  else if(key==='±'){ if(s.expr[0]==='-') s.expr=s.expr.slice(1); else if(s.expr!=='0') s.expr='-'+s.expr }
+  else if(key==='%'){ try{ s.expr=String(Number(s.expr)/100); s.reset=true }catch(_){ s.expr='Err' } }
+  else if(key==='='){
+    try{
+      const safe=s.expr.replace(/[^0-9+\-*/().]/g,'')
+      // eslint-disable-next-line no-new-func
+      const v=Function('"use strict";return('+safe+')')()
+      s.expr=String(Math.round(v*1e10)/1e10); s.reset=true
+      playBlip(720, 0.04)
+    }catch(_){ s.expr='Err'; s.reset=true }
+  }
+  else if('+-*/'.includes(key)){ s.expr += key; s.reset=false }
+  else {
+    if(s.reset || s.expr==='0' || s.expr==='Err'){ s.expr = key==='.' ? '0.' : key; s.reset=false }
+    else s.expr += key
+  }
+  window._calc=s; d.textContent=s.expr
+}
+
+/* ---- Timer ---- */
+function timerRender(){
+  const d=document.getElementById('timer-display'); if(!d||!window._timer) return
+  const t=Math.max(0, window._timer.left|0)
+  const m=String(Math.floor(t/60)).padStart(2,'0'), s=String(t%60).padStart(2,'0')
+  d.textContent=m+':'+s
+}
+function timerSet(sec){
+  if(window._timer && window._timer.id) clearInterval(window._timer.id)
+  window._timer={ left:sec, running:false, id:null }
+  const btn=document.getElementById('timer-toggle'); if(btn) btn.textContent='Start'
+  timerRender()
+}
+function timerToggle(){
+  const t=window._timer; if(!t) return
+  const btn=document.getElementById('timer-toggle')
+  if(t.running){
+    clearInterval(t.id); t.running=false; if(btn) btn.textContent='Start'
+  } else {
+    t.running=true; if(btn) btn.textContent='Pause'
+    t.id=setInterval(()=>{
+      t.left--
+      timerRender()
+      if(t.left<=0){
+        clearInterval(t.id); t.running=false; t.left=0; if(btn) btn.textContent='Start'
+        playBlip(880, 0.15); playBlip(660, 0.2); showToast('⏰ Timer done')
+      }
+    }, 1000)
+  }
+}
+function timerReset(){
+  const t=window._timer; if(!t) return
+  if(t.id) clearInterval(t.id)
+  t.left=300; t.running=false; t.id=null
+  const btn=document.getElementById('timer-toggle'); if(btn) btn.textContent='Start'
+  timerRender()
+}
+
+/* ---- Tasks ---- */
+function taskLoad(){
+  try{ return JSON.parse(localStorage.getItem('webos_tasks')||'[]') }catch(_){ return [] }
+}
+function taskSave(list){ localStorage.setItem('webos_tasks', JSON.stringify(list)) }
+function taskRender(){
+  const ul=document.getElementById('task-list'); if(!ul) return
+  const list=taskLoad()
+  ul.innerHTML = list.map((t,i)=>`
+    <li class="${t.done?'done':''}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="taskToggle(${i})" />
+      <span>${t.text.replace(/</g,'&lt;')}</span>
+      <button type="button" onclick="taskDel(${i})">✕</button>
+    </li>
+  `).join('') || '<li style="opacity:.5;border:none;background:transparent;">No tasks yet</li>'
+}
+function taskAdd(){
+  const input=document.getElementById('task-input'); if(!input) return
+  const text=input.value.trim(); if(!text) return
+  const list=taskLoad(); list.unshift({ text, done:false }); taskSave(list)
+  input.value=''; taskRender(); playBlip(600,0.04)
+}
+function taskToggle(i){
+  const list=taskLoad(); if(!list[i]) return
+  list[i].done=!list[i].done; taskSave(list); taskRender()
+}
+function taskDel(i){
+  const list=taskLoad(); list.splice(i,1); taskSave(list); taskRender()
+}
+
+
 function openFileFromManager(filename){
   openApp('notepad')
   setTimeout(() => {
@@ -1125,10 +1508,11 @@ function handleTermCmd(e){
     const args = input.split(' ')
     const cmd = args[0].toLowerCase()
 
-    if(cmd === 'help') out.textContent += `Commands: help, ls, cat <file>, live <aurora|nebula|orbs|circuit|off>, clear\n`
+    if(cmd === 'help') out.textContent += `Commands: help, ls, cat <file>, live <aurora|nebula|orbs|circuit|off>, apps, clear\n`
     else if(cmd === 'ls') out.textContent += Object.keys(virtualFS).join('  ') + '\n'
     else if(cmd === 'cat' && args[1]) out.textContent += (virtualFS[args[1]] || 'File not found') + '\n'
     else if(cmd === 'live'){ setLiveWallpaper(args[1]); out.textContent += `Wallpaper changed to '${args[1]}'\n` }
+    else if(cmd === 'apps') out.textContent += 'files notepad terminal browser piano calc timer tasks settings\n'
     else if(cmd === 'clear') out.textContent = ''
     else if(input !== '') out.textContent += `Unknown command: ${cmd}\n`
 

@@ -1,30 +1,36 @@
-# combined
+# WebOS + Piano
 
-Three browser projects in one place:
+A browser desktop environment with apps built in — including a **playable piano**.
 
-| App | File | What it is |
-|-----|------|------------|
-| **Piano** | `piano.html` | Keyboard / piano simulator (Web Audio) |
-| **WebOS** | `webos1.html` | Fake desktop OS in one HTML file |
-| **Toolbox** | `toolbox.html` | Small life/productivity tools |
+Open `index.html` (or serve the folder). No install.
+
+## Apps on the desktop
+
+| App | What it does |
+|-----|----------------|
+| **Piano** | One-octave keyboard, songs, octave + volume. Keys `A W S E D F T G Y H U J K` |
+| **Calculator** | Basic arithmetic |
+| **Timer** | 1 / 5 / 10 / 25 min presets |
+| **Tasks** | Checklist saved in localStorage |
+| **Files / Notepad / Terminal / Browser / Settings** | Original webOS apps |
+
+## Features
+
+- Boot screen, draggable/resizable windows, taskbar, start menu
+- Live canvas wallpapers (Aurora, Nebula, Orbs, Circuit)
+- Accent colors, optional UI sounds
+- Right-click desktop menu
+- Everything stays local (localStorage)
 
 ## Run
 
-Open `index.html` in a browser, or:
-
 ```bash
 python3 -m http.server 8000
-# http://localhost:8000
+# open http://localhost:8000
 ```
 
-No build step. No npm required for the main demos.
-
-## Sources
-
-- Piano — [STEVEALEX-source/bleh](https://github.com/STEVEALEX-source/bleh)
-- WebOS — [STEVEALEX-source/personal-webOS](https://github.com/STEVEALEX-source/personal-webOS)
-- Toolbox — [STEVEALEX-source/toolbox](https://github.com/STEVEALEX-source/toolbox)
+Or double-click `index.html`.
 
 ## Notes
 
-These files are committed here so Hackatime-tracked work matches the git history.
+Piano, calc, timer, and tasks are **inside** the OS windows — not separate pages.
