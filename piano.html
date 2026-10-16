@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#11171d">
+<title>Piano</title>
+<style>
+:root{color-scheme:light;--green:#6f9f83}
+*{box-sizing:border-box}
+html,body{margin:0;min-width:320px;min-height:100%;height:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#222;background:#f4f4f2}
+body{display:grid;place-items:center;padding:16px}
+.instrument{width:min(900px,100%)}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 2px 10px;color:#333;font-size:12px}
+.control-group{display:flex;align-items:center;gap:8px}
+select{border:1px solid #bbb;border-radius:3px;padding:6px 22px 6px 8px;background:#fff;color:#222;font:12px system-ui,sans-serif;cursor:pointer}
+.play-song{border:1px solid #888;border-radius:3px;padding:6px 11px;background:#fff;color:#222;font:12px system-ui,sans-serif;cursor:pointer}
+.play-song:hover{background:#e9e9e9}
+.controls select#song{max-width:180px}
+input[type=range]{appearance:none;width:100px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--green) 0 62%,#ccc 62%);cursor:pointer}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;border:1px solid #52765f;background:var(--green)}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;border:1px solid #52765f;background:var(--green)}
+.piano{position:relative;width:100%;height:clamp(210px,36vw,330px);padding:8px 8px 10px;border:1px solid #333;border-radius:4px;background:#282828;user-select:none;touch-action:manipulation}
+.whites{height:100%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px}
+.key{position:relative;padding:0;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.white{height:100%;border:1px solid #c7c7c7;border-radius:0 0 3px 3px;background:#fff;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:13px;color:#444;transition:background .08s,transform .08s}
+.white:hover{background:#f4f4f4}
+.white.pressed,.white:active{transform:translateY(2px);background:#ddd}
+.black{position:absolute;top:8px;z-index:3;height:62%;width:8.2%;border:1px solid #050505;border-radius:0 0 3px 3px;background:#171717;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:10px;color:#fff;transition:height .08s}
+.black.pressed,.black:active{height:63%;background:#333}
+.note{font:600 12px system-ui,sans-serif;line-height:1}
+.black .note{font-size:10px}
+@media(max-width:560px){body{padding:10px}.controls{font-size:11px;margin-bottom:8px}.control-group{gap:6px}select{font-size:11px;padding:6px 20px 6px 7px}input[type=range]{width:70px}.piano{padding:7px 6px 8px;height:clamp(200px,60vw,270px);border-radius:3px}.whites{gap:1px}.white{padding-bottom:10px}.black{top:6px;width:9%;padding-bottom:8px}.note{font-size:10px}.black .note{font-size:9px}}
+@media(max-width:560px){.controls{justify-content:flex-start;gap:9px 14px;flex-wrap:wrap}.controls select#song{max-width:145px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="instrument" aria-label="Playable piano">
+  <div class="controls">
+    <label class="control-group" for="song"><span>Song</span>
+      <select id="song" aria-label="Choose a song"><option value="twinkle">Twinkle Twinkle</option><option value="mary">Mary Had a Little Lamb</option><option value="ode">Ode to Joy</option><option value="birthday">Happy Birthday</option></select>
+    </label>
+    <label class="control-group" for="octave"><span>Octave</span>
+      <select id="octave" aria-label="Piano octave"><option value="3">C3</option><option value="4" selected>C4</option><option value="5">C5</option></select>
+    </label>
+    <label class="control-group" for="volume"><span>Volume</span><input id="volume" type="range" min="0" max="100" value="62" aria-label="Volume"></label>
+    <button class="play-song" id="playSong" type="button">Play</button>
+  </div>
+  <section class="piano" aria-label="One octave piano keyboard">
+    <div class="whites" id="whites"></div>
+    <div id="blacks"></div>
+  </section>
+  <span id="status" hidden aria-live="polite">Ready</span>
+</main>
+<script>
+(() => {
+  const whiteSteps=[0,2,4,5,7,9,11,12];
+  const blackSteps=[1,3,6,8,10];
+  const blackPositions=[12.5,25,50,62.5,75];
+  const names=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
+  const keyMap={a:0,w:1,s:2,e:3,d:4,f:5,t:6,g:7,y:8,h:9,u:10,j:11,k:12};
+  const whiteRoot=document.getElementById("whites");
+  const blackRoot=document.getElementById("blacks");
+  const octaveControl=document.getElementById("octave");
+  const volumeControl=document.getElementById("volume");
+  const songControl=document.getElementById("song");
+  const playSongButton=document.getElementById("playSong");
+  const status=document.getElementById("status");
+  let audio=null;
+  let activeMidi=[];
+  let songTimers=[];
+  let songRun=0;
+  const songs={
+    twinkle:[0,0,7,7,9,9,7,5,5,4,4,2,2,0,7,7,5,5,4,4,2,7,7,5,5,4,4,2,0,0,7,7,9,9,7,5,5,4,4,2,2,0],
+    mary:[4,2,0,2,4,4,4,2,2,2,4,7,7,4,2,0,2,4,4,4,4,2,2,4,2,0],
+    ode:[4,4,5,7,7,5,4,2,0,0,2,4,4,2,2,4,4,5,7,7,5,4,2,0,0,2,4,2,0,0],
+    birthday:[0,0,2,0,5,4,0,0,2,0,7,5,0,0,12,9,5,4,2,10,10,9,5,7,5]
+  };
+  const noteName=midi=>names[midi%12]+(Math.floor(midi/12)-1);
+  function stopSong(){
+    songRun++;
+    songTimers.forEach(timer=>clearTimeout(timer));
+    songTimers=[];
+    playSongButton.textContent="Play";
+    playSongButton.setAttribute("aria-pressed","false");
+  }
+  function playSong(){
+    if(songTimers.length){stopSong();return}
+    const melody=songs[songControl.value];
+    const run=++songRun;
+    playSongButton.textContent="Stop";
+    playSongButton.setAttribute("aria-pressed","true");
+    melody.forEach((note,beat)=>{
+      songTimers.push(setTimeout(()=>{
+        if(run!==songRun)return;
+        play(note);
+        if(beat===melody.length-1){songTimers=[];playSongButton.textContent="Play";playSongButton.setAttribute("aria-pressed","false")}
+      },beat*340));
+    });
+  }
+  function makeKey(midi,index,color){
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="key "+color;
+    button.dataset.index=String(index);
+    button.setAttribute("aria-label",noteName(midi));
+    button.innerHTML='<span class="note">'+names[midi%12]+'</span>';
+    button.addEventListener("click",()=>play(index));
+    button.addEventListener("contextmenu",event=>event.preventDefault());
+    return button;
+  }
+  function buildKeyboard(){
+    stopSong();
+    const base=Number(octaveControl.value)*12+12;
+    activeMidi=Array.from({length:13},(_,index)=>base+index);
+    whiteRoot.replaceChildren();blackRoot.replaceChildren();
+    whiteSteps.forEach(step=>whiteRoot.appendChild(makeKey(base+step,step,"white")));
+    blackSteps.forEach((step,index)=>{
+      const button=makeKey(base+step,step,"black");
+      button.style.left=blackPositions[index]+"%";
+      blackRoot.appendChild(button);
+    });
+    status.textContent="C"+octaveControl.value+"–C"+(Number(octaveControl.value)+1)+" · ready";
+  }
+  async function getAudio(){
+    if(!audio){const C=window.AudioContext||window.webkitAudioContext;if(!C){status.textContent="Web Audio unavailable";return null}audio=new C()}
+    if(audio.state==="suspended"){try{await audio.resume()}catch(_){return null}}
+    return audio;
+  }
+  async function play(index){
+    const context=await getAudio();if(!context)return;
+    const midi=activeMidi[index],frequency=440*Math.pow(2,(midi-69)/12),now=context.currentTime;
+    const master=context.createGain(),filter=context.createBiquadFilter();
+    const loudness=Math.max(.0001,Number(volumeControl.value)/100*.22);
+    master.gain.setValueAtTime(.0001,now);master.gain.exponentialRampToValueAtTime(loudness,now+.006);master.gain.exponentialRampToValueAtTime(.0001,now+2.2);
+    filter.type="lowpass";filter.frequency.setValueAtTime(5200,now);filter.Q.value=.7;master.connect(filter);filter.connect(context.destination);
+    [[1,1],[2,.31],[3,.12],[4,.055],[5,.022]].forEach(([ratio,amplitude],partial)=>{
+      const oscillator=context.createOscillator(),gain=context.createGain();oscillator.type=partial===0?"triangle":"sine";oscillator.frequency.setValueAtTime(frequency*ratio,now);gain.gain.value=amplitude;oscillator.connect(gain);gain.connect(master);oscillator.start(now);oscillator.stop(now+2.25);
+    });
+    const key=document.querySelector('.key[data-index="'+index+'"]');
+    if(key){key.classList.add("pressed");setTimeout(()=>key.classList.remove("pressed"),140)}
+    status.textContent=noteName(midi)+" · playing";clearTimeout(play.timer);play.timer=setTimeout(()=>status.textContent="C"+octaveControl.value+"–C"+(Number(octaveControl.value)+1)+" · ready",700);
+  }
+  octaveControl.addEventListener("change",buildKeyboard);
+  songControl.addEventListener("change",stopSong);
+  playSongButton.addEventListener("click",playSong);
+  volumeControl.addEventListener("input",()=>{const v=volumeControl.value;volumeControl.style.background="linear-gradient(90deg,var(--green) 0 "+v+"%,#ffffff30 "+v+"%)"});
+  window.addEventListener("keydown",event=>{
+    if(event.repeat||event.ctrlKey||event.altKey||event.metaKey||["INPUT","SELECT"].includes(event.target&&event.target.tagName))return;
+    const index=keyMap[event.key.toLowerCase()];if(index!==undefined){event.preventDefault();play(index)}
+  });
+  buildKeyboard();
+})();
+</script>
+</body>
+</html>
